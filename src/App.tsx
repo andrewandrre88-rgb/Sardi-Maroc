@@ -75,6 +75,7 @@ const translations = {
     owner_title: "صاحب الضيعة: يوسف",
     owner_quote: "\"نحن في ضيعتنا نحرص على تربية الأغنام بطريقة طبيعية وصحية لضمان جودة اللحم وسلامة الأضحية. يسعدنا استقبالكم وخدمتكم لتوفير أفضل تجربة لعيد الأضحى.\"",
     footer_rights: "جميع الحقوق محفوظة لشركة خروف العيد المغربية",
+    whatsapp_msg: "السلام عليكم يوسف، أريد حجز أضحية:\n\n*الاسم:* {name}\n*الهاتف:* {phone}\n*النوع:* {type}",
     lang_toggle: "FR",
     dir: "rtl"
   },
@@ -131,6 +132,7 @@ const translations = {
     owner_title: "Propriétaire : Youssef",
     owner_quote: "\"Dans notre ferme, nous élevons nos moutons naturellement pour garantir qualité et santé. Nous sommes ravis de vous servir pour l'Aïd.\"",
     footer_rights: "Tous droits réservés à Khrouf L'Aïd Maroc",
+    whatsapp_msg: "Bonjour Youssef, je souhaite réserver un mouton :\n\n*Nom:* {name}\n*Téléphone:* {phone}\n*Type:* {type}",
     lang_toggle: "AR",
     dir: "ltr"
   }
@@ -201,8 +203,18 @@ export default function App() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const typeName = formData.type === "sardi" ? t.ram_sardi_name : t.ram_beldi_name;
+    const message = t.whatsapp_msg
+      .replace("{name}", formData.name)
+      .replace("{phone}", formData.phone)
+      .replace("{type}", typeName);
+    
+    const whatsappUrl = `https://wa.me/212613148166?text=${encodeURIComponent(message)}`;
+    
+    window.open(whatsappUrl, "_blank");
+    
     setIsSubmitted(true);
-    // In a real app, this would send data to a backend
     setTimeout(() => setIsSubmitted(false), 5000);
   };
 
@@ -451,7 +463,7 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <div className={`bg-white rounded-[2.5rem] p-8 lg:p-12 text-[#2D2D2D] shadow-2xl ${lang === "ar" ? "text-right" : "text-left"}`}>
+            <div className={`bg-white rounded-[2.5rem] p-8 lg:p-12 text-[#2D2D2D] shadow-2xl border border-[#25D366]/20 ${lang === "ar" ? "text-right" : "text-left"}`}>
               {isSubmitted ? (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -507,8 +519,9 @@ export default function App() {
                   </div>
                   <button 
                     type="submit"
-                    className="w-full py-5 bg-[#5A5A40] text-white rounded-2xl text-lg font-bold hover:bg-[#4A4A35] transition-all shadow-lg shadow-[#5A5A40]/20"
+                    className="w-full py-5 bg-[#25D366] text-white rounded-2xl text-lg font-bold hover:bg-[#128C7E] transition-all shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-3"
                   >
+                    <WhatsAppIcon size={24} />
                     {t.form_submit}
                   </button>
                 </form>
