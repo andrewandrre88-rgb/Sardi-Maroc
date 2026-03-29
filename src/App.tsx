@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   CheckCircle2, 
   Truck, 
@@ -14,6 +14,7 @@ import {
   Facebook, 
   Twitter,
   ChevronLeft,
+  ChevronRight,
   ShoppingBag,
   Star,
   MessageCircle,
@@ -27,6 +28,7 @@ const translations = {
     nav_types: "أنواع الأضاحي",
     nav_features: "مميزاتنا",
     nav_order: "احجز الآن",
+    nav_gallery: "معرض الصور",
     hero_badge: "عيد أضحى مبارك 🌙 - عروض حصرية للمغاربة",
     hero_title_1: "أضحيتك ",
     hero_title_2: "بأمان",
@@ -72,6 +74,8 @@ const translations = {
     logo_name: "خروف العيد",
     price_sardi: "3,500 - 5,500 درهم",
     price_beldi: "2,800 - 4,500 درهم",
+    gallery_title: "معرض الصور",
+    gallery_desc: "لمحات من ضيعتنا وأجود أنواع الأضاحي المتوفرة لدينا",
     owner_title: "صاحب الضيعة: يوسف",
     owner_quote: "\"نحن في ضيعتنا نحرص على تربية الأغنام بطريقة طبيعية وصحية لضمان جودة اللحم وسلامة الأضحية. يسعدنا استقبالكم وخدمتكم لتوفير أفضل تجربة لعيد الأضحى.\"",
     footer_rights: "جميع الحقوق محفوظة لشركة خروف العيد المغربية",
@@ -84,6 +88,7 @@ const translations = {
     nav_types: "Nos Moutons",
     nav_features: "Avantages",
     nav_order: "Réserver",
+    nav_gallery: "Galerie",
     hero_badge: "Aïd Adha Moubarak 🌙 - Offres Exclusives",
     hero_title_1: "Votre sacrifice ",
     hero_title_2: "en sécurité",
@@ -129,6 +134,8 @@ const translations = {
     logo_name: "Khrouf L'Aïd",
     price_sardi: "3,500 - 5,500 DH",
     price_beldi: "2,800 - 4,500 DH",
+    gallery_title: "Galerie Photos",
+    gallery_desc: "Aperçu de notre ferme et des meilleures races de moutons disponibles",
     owner_title: "Propriétaire : Youssef",
     owner_quote: "\"Dans notre ferme, nous élevons nos moutons naturellement pour garantir qualité et santé. Nous sommes ravis de vous servir pour l'Aïd.\"",
     footer_rights: "Tous droits réservés à Khrouf L'Aïd Maroc",
@@ -150,9 +157,85 @@ const WhatsAppIcon = ({ size = 24 }: { size?: number }) => (
   </svg>
 );
 
+const Carousel = ({ images, alt }: { images: string[], alt: string }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const next = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  if (images.length <= 1) {
+    return (
+      <img 
+        src={images[0]} 
+        alt={alt} 
+        className="w-full h-full object-cover"
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full group">
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={currentIndex}
+          src={images[currentIndex]}
+          alt={`${alt} ${currentIndex + 1}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      </AnimatePresence>
+      
+      <button 
+        onClick={prev}
+        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/50 backdrop-blur-sm rounded-full flex items-center justify-center text-[#5A5A40] opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <ChevronLeft size={20} />
+      </button>
+      
+      <button 
+        onClick={next}
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/50 backdrop-blur-sm rounded-full flex items-center justify-center text-[#5A5A40] opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <ChevronRight size={20} />
+      </button>
+
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+        {images.map((_, i) => (
+          <div 
+            key={i} 
+            className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? "bg-white w-3" : "bg-white/50"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   const [lang, setLang] = useState<"ar" | "fr">("ar");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const t = translations[lang];
+
+  const GALLERY_IMAGES = [
+    "https://raw.githubusercontent.com/andrewandrre88-rgb/images-images/main/WhatsApp%20Image%202026-03-29%20at%2021.38.50.jpeg",
+    "https://raw.githubusercontent.com/andrewandrre88-rgb/images-images/main/WhatsApp%20Image%202026-03-29%20at%2021.38.57.jpeg",
+    "https://raw.githubusercontent.com/andrewandrre88-rgb/images-images/main/WhatsApp%20Image%202026-03-29%20at%2021.39.05.jpeg",
+    "https://raw.githubusercontent.com/andrewandrre88-rgb/images-images/main/WhatsApp%20Image%202026-03-29%20at%2021.39.15.jpeg",
+    "https://raw.githubusercontent.com/andrewandrre88-rgb/images-images/main/WhatsApp%20Image%202026-03-29%20at%2021.40.29.jpeg",
+    "https://raw.githubusercontent.com/andrewandrre88-rgb/images-images/main/WhatsApp%20Image%202026-03-29%20at%2021.40.52.jpeg"
+  ];
 
   const RAM_TYPES = [
     {
@@ -160,7 +243,7 @@ export default function App() {
       name: t.ram_sardi_name,
       description: t.ram_sardi_desc,
       price: t.price_sardi,
-      image: "https://upload.wikimedia.org/wikipedia/commons/9/99/M%C3%A2le_de_race_Sardi.JPG",
+      images: ["https://upload.wikimedia.org/wikipedia/commons/9/99/M%C3%A2le_de_race_Sardi.JPG"],
       tag: t.tag_popular,
       key: "sardi"
     },
@@ -169,7 +252,7 @@ export default function App() {
       name: t.ram_beldi_name,
       description: t.ram_beldi_desc,
       price: t.price_beldi,
-      image: "https://media.elbalad.news/2024/10/large/566/1/283.jpg",
+      images: ["https://media.elbalad.news/2024/10/large/566/1/283.jpg"],
       tag: t.tag_authentic,
       key: "beldi"
     }
@@ -236,6 +319,7 @@ export default function App() {
               <a href="#home" className="hover:text-[#5A5A40] transition-colors">{t.nav_home}</a>
               <a href="#types" className="hover:text-[#5A5A40] transition-colors">{t.nav_types}</a>
               <a href="#features" className="hover:text-[#5A5A40] transition-colors">{t.nav_features}</a>
+              <a href="#gallery" className="hover:text-[#5A5A40] transition-colors">{t.nav_gallery}</a>
               <button 
                 onClick={toggleLang}
                 className="px-3 py-1 border border-[#5A5A40] text-[#5A5A40] rounded-md hover:bg-[#5A5A40] hover:text-white transition-all font-bold"
@@ -278,6 +362,7 @@ export default function App() {
             <a href="#home" onClick={() => setIsMenuOpen(false)} className="block text-lg font-medium">{t.nav_home}</a>
             <a href="#types" onClick={() => setIsMenuOpen(false)} className="block text-lg font-medium">{t.nav_types}</a>
             <a href="#features" onClick={() => setIsMenuOpen(false)} className="block text-lg font-medium">{t.nav_features}</a>
+            <a href="#gallery" onClick={() => setIsMenuOpen(false)} className="block text-lg font-medium">{t.nav_gallery}</a>
             <a href="#order" onClick={() => setIsMenuOpen(false)} className="block w-full text-center bg-[#5A5A40] text-white px-6 py-3 rounded-xl font-bold">{t.nav_order}</a>
           </motion.div>
         )}
@@ -382,12 +467,7 @@ export default function App() {
                 className="group bg-white rounded-[2rem] overflow-hidden border border-[#E5E5E1] shadow-sm hover:shadow-xl transition-all flex flex-col h-full"
               >
                 <div className="relative aspect-video overflow-hidden">
-                  <img 
-                    src={ram.image} 
-                    alt={ram.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
+                  <Carousel images={ram.images} alt={ram.name} />
                   <div className={`absolute top-4 ${lang === "ar" ? "right-4" : "left-4"} bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#5A5A40]`}>
                     {ram.tag}
                   </div>
@@ -530,6 +610,71 @@ export default function App() {
           </div>
         </div>
       </section>
+
+      {/* Gallery Section */}
+      <section id="gallery" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold font-serif text-[#5A5A40] mb-4">{t.gallery_title}</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">{t.gallery_desc}</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {GALLERY_IMAGES.map((img, index) => (
+              <motion.div 
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
+                onClick={() => setSelectedImage(img)}
+                className="relative aspect-square rounded-3xl overflow-hidden cursor-pointer group"
+              >
+                <img 
+                  src={img} 
+                  alt={`Gallery ${index + 1}`} 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white">
+                    <Star size={24} />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Image Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <button 
+              className="absolute top-6 right-6 text-white p-2 hover:bg-white/10 rounded-full transition-colors"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X size={32} />
+            </button>
+            <motion.img 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              src={selectedImage} 
+              alt="Gallery Full" 
+              className="max-w-full max-h-full rounded-2xl shadow-2xl"
+              referrerPolicy="no-referrer"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Meet the Owner Section */}
       <section className="py-16 bg-[#FDFCF8]">
